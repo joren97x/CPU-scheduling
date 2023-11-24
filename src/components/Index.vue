@@ -9,11 +9,11 @@
     <div class="bg-grey-lighten-4" style="height: 100vh;">
         <v-container>
             <v-row class="mt-6">
-                <v-col cols="4">
+                <v-col cols="12" md="12" sm="12" xs="12" lg="4" xl="8" xxl="8">
                     <v-card>
                         <v-card-item>
                             <p class="text-h4 my-3 font-weight-bold">Input</p>
-                            <v-select variant="outlined" color="blue" :items="['First Come First Serve']" label="Algorithm"></v-select>
+                            <v-select variant="outlined" color="blue" :items="['First Come First Serve', 'Shorted Job First (non-preemptive)', 'Round-Robin']" label="Algorithm"></v-select>
                             <v-text-field variant="outlined" color="blue" label="Arrival Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
                             <v-text-field variant="outlined" color="blue" label="Burst Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
                         </v-card-item>
@@ -23,10 +23,10 @@
                         </v-card-actions>
                     </v-card>
                 </v-col>
-                <v-col cols="8">
+                <v-col cols="12" md="12" sm="12" xs="12" lg="8" xxl="8" xl="8">
                     <v-card>
                         <v-card-item>
-                            <p class="text-h4 my-3 font-weight-bold">Output</p>
+                            <p class="text-h4 my-3 font-weight-bold">Output <span class="text-red">not working rn</span> </p>
                             <p v-show="!showOutput">Gantt chart and table will be shown here</p>
                             <!-- <div class="d-flex align-center flex-column">
                                 <strong class="text-h6">Gantt chart</strong>

@@ -1,6 +1,6 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
-  publicPath: '/cpu-scheduling/',
+  publicPath: '/CPU-scheduling/',
   transpileDependencies: true,
 
   pluginOptions: {

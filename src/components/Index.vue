@@ -2,7 +2,85 @@
 
     import {ref} from 'vue'
 
+    const algorithm = ref('First Come First Serve')
+    const inputError = ref(false)
     const showOutput = ref(false)
+    const showSolveButton = ref(true)
+    const arrivalTimes = ref('')
+    const burstTimes = ref('')
+    const formattedAT = ref()
+    const formattedBT = ref()
+    const processes = ref([])
+    const ganttChartTimes = ref([])
+    const averageCompletionTime = ref()
+    const averageTurnAroundTime = ref()
+    const averageWaitingTime = ref()
+    const algorithms = [
+        {
+            name: 'First Come First Serve',
+            disabled: false,
+        },
+        {
+            name: 'Shortest Job First (non-preemptive)',
+            disabled: true,
+        },
+        {
+            name: 'Round Robin',
+            disabled: true,
+        },
+    ]
+
+    function solve() {
+        formattedAT.value = arrivalTimes.value.trim().split(" ")
+        formattedBT.value = burstTimes.value.trim().split(" ")
+        if(formattedAT.value.length != formattedBT.value.length || burstTimes.value.length == 0 || arrivalTimes.value.length == 0 || /[^0-9\s]/.test(arrivalTimes.value) || /[^0-9\s]/.test(burstTimes.value)) {
+            inputError.value = true
+        }
+        else {
+            showSolveButton.value = false
+            showOutput.value = true
+            for(let i = 0; i < formattedAT.value.length; i++) {
+                processes.value.push({
+                    process_name: `P${i+1}`,
+                    'arrival_time': formattedAT.value[i], 
+                    'burst_time': formattedBT.value[i]
+                })
+            }
+
+            processes.value.sort((a, b) => a.arrival_time - b.arrival_time)
+            let defaultTime = parseInt(processes.value[0].arrival_time)
+            let completion_time = 0
+            let turn_around_time = 0
+            let waiting_time = 0
+            ganttChartTimes.value.push(defaultTime)
+            for(let i = 0; i < processes.value.length; i++) {
+                defaultTime += parseInt(processes.value[i].burst_time)
+                console.log("Default Time: " + defaultTime)
+                console.log("Arrival time: " + processes.value[i].arrival_time)
+                ganttChartTimes.value.push(defaultTime)
+                processes.value[i].completion_time = defaultTime
+                completion_time += defaultTime
+                processes.value[i].turn_around_time = defaultTime - parseInt(processes.value[i].arrival_time)
+                turn_around_time += parseInt(processes.value[i].turn_around_time)
+                processes.value[i].waiting_time = parseInt(processes.value[i].turn_around_time) - parseInt(processes.value[i].burst_time)
+                waiting_time += parseInt(processes.value[i].waiting_time)
+            }
+            averageCompletionTime.value = completion_time / processes.value.length
+            averageWaitingTime.value = waiting_time / processes.value.length
+            averageTurnAroundTime.value = turn_around_time / processes.value.length
+
+        }
+        
+    }
+
+    function reset() {
+        processes.value = []
+        ganttChartTimes.value = []
+        arrivalTimes.value = ''
+        burstTimes.value = ''
+        showSolveButton.value = true
+        showOutput.value = false
+    }
 
 </script>
 <template>
@@ -13,52 +91,35 @@
                     <v-card>
                         <v-card-item>
                             <p class="text-h4 my-3 font-weight-bold">Input</p>
-                            <v-select variant="outlined" color="blue" :items="['First Come First Serve', 'Shorted Job First (non-preemptive)', 'Round-Robin']" label="Algorithm"></v-select>
-                            <v-text-field variant="outlined" color="blue" label="Arrival Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
-                            <v-text-field variant="outlined" color="blue" label="Burst Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
+                            <v-select density="comfortable" variant="outlined" color="blue" :items="algorithms" item-title="name" v-model="algorithm" label="Algorithm">
+                                <template v-slot:item="{ props, item }">
+                                    <v-list-item v-bind="props" :disabled="item.raw.disabled" :title="item.raw.name"></v-list-item>
+                                </template>
+                            </v-select>
+                            <v-text-field clearable density="comfortable" variant="outlined" color="blue" v-model="arrivalTimes" label="Arrival Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
+                            <v-text-field clearable density="comfortable" variant="outlined" color="blue" v-model="burstTimes" label="Burst Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
                         </v-card-item>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue" variant="flat" @click="showOutput = !showOutput">Solve</v-btn>
+                            <v-btn color="blue" v-if="showSolveButton" variant="flat" @click="solve">Solve</v-btn>
+                            <v-btn color="red" v-else variant="flat" @click="reset">Reset</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-col>
                 <v-col cols="12" md="12" sm="12" xs="12" lg="8" xxl="8" xl="8">
                     <v-card>
                         <v-card-item>
-                            <p class="text-h4 my-3 font-weight-bold">Output <span class="text-red">not working rn</span> </p>
+                            <p class="text-h4 my-3 font-weight-bold">Output</p>
                             <p v-show="!showOutput">Gantt chart and table will be shown here</p>
-                            <!-- <div class="d-flex align-center flex-column">
-                                <strong class="text-h6">Gantt chart</strong>
-                                <v-btn-toggle variant="outlined" divided class="bg-blue">
-                                    <v-btn>P1 </v-btn>
-                                    <v-btn>P2</v-btn>
-                                    <v-btn>P3</v-btn>
-                                    <v-btn>P4</v-btn>
-                                </v-btn-toggle>
-                            </div> -->
                             <div v-if="showOutput">
                                 <p class="text-h6 text-center">Gantt chart</p>
                                 <div class="d-flex align-center justify-center mb-8">
-                                    <div class="position-relative">
-                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">P1</div>
-                                        <span class="number">1</span>
-                                    </div>
-                                    <div class="position-relative">
-                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">P2</div>
-                                        <span class="number">2</span>
-                                    </div>
-                                    <div class="position-relative">
-                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">P3</div>
-                                        <span class="number">3</span>
-                                    </div>
-                                    <div class="position-relative">
-                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">P4</div>
-                                        <span class="last_number">5</span>
-                                        <span class="number">4</span>
+                                    <div class="position-relative" v-for="(process, i) in processes" :key="process.process_name">
+                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">{{ process.process_name }}</div>
+                                        <span class="number">{{ ganttChartTimes[i] }}</span>
+                                        <span class="last_number" v-if="i == processes.length-1">{{ ganttChartTimes[processes.length] }}</span>
                                     </div>
                                 </div>
-
                                 
                                 <v-table border hover>
                                     <thead>
@@ -72,20 +133,20 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="n in 4" :key="n">
-                                            <td>P{{n}}</td>
-                                            <td>{{n}}</td>
-                                            <td>{{ n * 2 }}</td>
-                                            <td>7</td>
-                                            <td>2</td>
-                                            <td>4</td>
+                                        <tr v-for="process in processes" :key="process.process_name">
+                                            <td>{{process.process_name}}</td>
+                                            <td>{{process.arrival_time}}</td>
+                                            <td>{{process.burst_time }}</td>
+                                            <td>{{ process.completion_time }}</td>
+                                            <td>{{ process.turn_around_time }}</td>
+                                            <td>{{ process.waiting_time }}</td>
                                         </tr>
                                         
                                         <tr>
                                             <td colspan="3" class="text-end">Average</td>
-                                            <td>10</td>
-                                            <td>9</td>
-                                            <td>8</td>
+                                            <td>{{averageCompletionTime.toFixed(3)}}</td>
+                                            <td>{{averageTurnAroundTime.toFixed(3)}}</td>
+                                            <td>{{averageWaitingTime.toFixed(3)}}</td>
                                         </tr>
                                     </tbody>
                                 </v-table>
@@ -95,6 +156,19 @@
                 </v-col>
             </v-row>
         </v-container>
+        <v-dialog v-model="inputError" width="50vw">
+            <v-card>
+                <v-card-text class="text-center">
+                    <v-icon color="red" size="100">mdi-close-circle</v-icon>
+                    <br>
+                    <p class="text-h4 text-red">Invalid input</p>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" @click="inputError = false">AWW IKAW GUD</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -105,7 +179,7 @@
 
 .number {
     position: absolute;
-    bottom: -30px; /* Adjust this value to change the distance from the bottom */
+    bottom: -30px; 
     left: -11px; 
     padding: 3px 8px;
     border-radius: 4px;
@@ -113,8 +187,8 @@
 
 .last_number {
     position: absolute;
-    bottom: -30px; /* Adjust this value to change the distance from the bottom */
-    right: -11px; 
+    bottom: -30px;
+    right: -15px; 
     padding: 3px 8px;
     border-radius: 4px;
 }

@@ -2,90 +2,146 @@
 
     import {ref} from 'vue'
 
-    const algorithm = ref('First Come First Serve')
-    const inputError = ref(false)
-    const showOutput = ref(false)
-    const showSolveButton = ref(true)
-    const arrivalTimes = ref('')
-    const burstTimes = ref('')
-    const formattedAT = ref()
-    const formattedBT = ref()
-    const processes = ref([])
-    const ganttChartTimes = ref([])
-    const averageCompletionTime = ref()
-    const averageTurnAroundTime = ref()
-    const averageWaitingTime = ref()
-    const algorithms = [
-        {
-            name: 'First Come First Serve',
-            disabled: false,
-        },
-        {
-            name: 'Shortest Job First (non-preemptive)',
-            disabled: true,
-        },
-        {
-            name: 'Round Robin',
-            disabled: true,
-        },
-    ]
+    // const algorithm = ref('First Come First Serve')
+    // const inputError = ref(false)
+    // const showOutput = ref(false)
+    // const showSolveButton = ref(true)
+    // const arrivalTimes = ref('')
+    // const burstTimes = ref('')
+    // const formattedAT = ref()
+    // const formattedBT = ref()
+    // const processes = ref([])
+    // const ganttChartTimes = ref([])
+    // const averageCompletionTime = ref()
+    // const averageTurnAroundTime = ref()
+    // const averageWaitingTime = ref()
+    // const algorithms = [
+    //     {
+    //         name: 'First Come First Serve',
+    //         disabled: false,
+    //     },
+    //     {
+    //         name: 'Shortest Job First (non-preemptive)',
+    //         disabled: true,
+    //     },
+    //     {
+    //         name: 'Round Robin',
+    //         disabled: true,
+    //     },
+    // ]
 
-    function solve() {
-        formattedAT.value = arrivalTimes.value.trim().split(" ")
-        formattedBT.value = burstTimes.value.trim().split(" ")
-        if(formattedAT.value.length != formattedBT.value.length || burstTimes.value.length == 0 || arrivalTimes.value.length == 0 || /[^0-9\s]/.test(arrivalTimes.value) || /[^0-9\s]/.test(burstTimes.value)) {
-            inputError.value = true
-        }
-        else {
-            showSolveButton.value = false
-            showOutput.value = true
-            for(let i = 0; i < formattedAT.value.length; i++) {
-                processes.value.push({
-                    process_name: `P${i+1}`,
-                    'arrival_time': formattedAT.value[i], 
-                    'burst_time': formattedBT.value[i]
-                })
-            }
+    // function solve() {
+    //     formattedAT.value = arrivalTimes.value.trim().split(" ")
+    //     formattedBT.value = burstTimes.value.trim().split(" ")
+    //     if(formattedAT.value.length != formattedBT.value.length || burstTimes.value.length == 0 || arrivalTimes.value.length == 0 || /[^0-9\s]/.test(arrivalTimes.value) || /[^0-9\s]/.test(burstTimes.value)) {
+    //         inputError.value = true
+    //     }
+    //     else {
+    //         showSolveButton.value = false
+    //         showOutput.value = true
+    //         for(let i = 0; i < formattedAT.value.length; i++) {
+    //             processes.value.push({
+    //                 process_name: `P${i+1}`,
+    //                 'arrival_time': formattedAT.value[i], 
+    //                 'burst_time': formattedBT.value[i]
+    //             })
+    //         }
 
-            processes.value.sort((a, b) => a.arrival_time - b.arrival_time)
-            let defaultTime = parseInt(processes.value[0].arrival_time)
-            let completion_time = 0
-            let turn_around_time = 0
-            let waiting_time = 0
-            ganttChartTimes.value.push(defaultTime)
-            for(let i = 0; i < processes.value.length; i++) {
-                defaultTime += parseInt(processes.value[i].burst_time)
-                console.log("Default Time: " + defaultTime)
-                console.log("Arrival time: " + processes.value[i].arrival_time)
-                ganttChartTimes.value.push(defaultTime)
-                processes.value[i].completion_time = defaultTime
-                completion_time += defaultTime
-                processes.value[i].turn_around_time = defaultTime - parseInt(processes.value[i].arrival_time)
-                turn_around_time += parseInt(processes.value[i].turn_around_time)
-                processes.value[i].waiting_time = parseInt(processes.value[i].turn_around_time) - parseInt(processes.value[i].burst_time)
-                waiting_time += parseInt(processes.value[i].waiting_time)
-            }
-            averageCompletionTime.value = completion_time / processes.value.length
-            averageWaitingTime.value = waiting_time / processes.value.length
-            averageTurnAroundTime.value = turn_around_time / processes.value.length
+    //         processes.value.sort((a, b) => a.arrival_time - b.arrival_time)
+    //         let defaultTime = parseInt(processes.value[0].arrival_time)
+    //         let completion_time = 0
+    //         let turn_around_time = 0
+    //         let waiting_time = 0
+    //         ganttChartTimes.value.push(defaultTime)
+    //         for(let i = 0; i < processes.value.length; i++) {
+    //             defaultTime += parseInt(processes.value[i].burst_time)
+    //             console.log("Default Time: " + defaultTime)
+    //             console.log("Arrival time: " + processes.value[i].arrival_time)
+    //             ganttChartTimes.value.push(defaultTime)
+    //             processes.value[i].completion_time = defaultTime
+    //             completion_time += defaultTime
+    //             processes.value[i].turn_around_time = defaultTime - parseInt(processes.value[i].arrival_time)
+    //             turn_around_time += parseInt(processes.value[i].turn_around_time)
+    //             processes.value[i].waiting_time = parseInt(processes.value[i].turn_around_time) - parseInt(processes.value[i].burst_time)
+    //             waiting_time += parseInt(processes.value[i].waiting_time)
+    //         }
+    //         averageCompletionTime.value = completion_time / processes.value.length
+    //         averageWaitingTime.value = waiting_time / processes.value.length
+    //         averageTurnAroundTime.value = turn_around_time / processes.value.length
 
-        }
+    //     }
         
+    // }
+
+    // function reset() {
+    //     processes.value = []
+    //     ganttChartTimes.value = []
+    //     arrivalTimes.value = ''
+    //     burstTimes.value = ''
+    //     showSolveButton.value = true
+    //     showOutput.value = false
+    // }
+
+    class Process {
+        constructor(name, arrivalTime, burstTime) {
+            this.name = name
+            this.arrivalTime = arrivalTime
+            this.burstTime = burstTime
+            this.remainingTime = burstTime
+        }
     }
 
-    function reset() {
-        processes.value = []
-        ganttChartTimes.value = []
-        arrivalTimes.value = ''
-        burstTimes.value = ''
-        showSolveButton.value = true
-        showOutput.value = false
+
+    const processes = [
+        new Process('P1', 0, 5),
+        new Process('P2', 2, 4),
+        new Process('P3', 3, 2),
+        new Process('p4', 1, 7),
+        new Process('P5', 3, 2)
+    ];
+    const quantumTime = 2
+
+    function round_robin(processes, quantum) {
+        let queue = [...processes]
+        let currentTime = 0
+        let completedProcesses = []
+
+        while(queue.length > 0) {
+            let currentProcess = queue.shift()
+
+            if(currentProcess.remainingTime > quantum) {
+                currentTime += quantum
+                currentProcess.remainingTime -= quantum
+                queue.push(currentProcess)
+            }
+            else {
+                currentTime += currentProcess.remainingTime
+                currentProcess.remainingTime = 0
+                currentProcess.completionTime = currentTime
+                completedProcesses.push(currentProcess)
+            }
+
+            for(let i = 0; i < processes.length; i++) {
+                if(processes[i].arrivalTime <= currentTime && !queue.includes(processes[i]) && processes[i].remainingTime > 0) {
+                    queue.push(processes[i])
+                }
+            }
+
+        }
+
+        return completedProcesses
+
     }
+
+    console.log("ROUND ROBIN RESULTS")
+    console.log(round_robin(processes, quantumTime))
 
 </script>
 <template>
     <div class="bg-grey-lighten-4" style="height: 100vh;">
-        <v-container>
+        yo
+        {{ processes }}
+        <!-- <v-container>
             <v-row class="mt-6">
                 <v-col cols="12" md="12" sm="12" xs="12" lg="4" xl="8" xxl="8">
                     <v-card>
@@ -155,8 +211,8 @@
                     </v-card>
                 </v-col>
             </v-row>
-        </v-container>
-        <v-dialog v-model="inputError" width="50vw">
+        </v-container> -->
+        <!-- <v-dialog v-model="inputError" width="50vw">
             <v-card>
                 <v-card-text class="text-center">
                     <v-icon color="red" size="100">mdi-close-circle</v-icon>
@@ -168,7 +224,7 @@
                     <v-btn color="primary" @click="inputError = false">AWW IKAW GUD</v-btn>
                 </v-card-actions>
             </v-card>
-        </v-dialog>
+        </v-dialog> -->
     </div>
 </template>
 

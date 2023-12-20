@@ -1,22 +1,58 @@
 <script setup>
 
     import {rr} from './algorithm/rr.js'
+    import {fcfs} from './algorithm/fcfs.js'
+    import {ref} from 'vue'
 
-// Example data
-const arrivalTime = [0, 4, 1, 4, 8]
-const burstTime = [8, 10, 5, 3, 2]
-const timeQuantum = 3
+    // Example data
+    const arrivalTime = ref([])
+    const burstTime = ref([])
+    const timeQuantum = ref(null)
+    // const result = rr(arrivalTime, burstTime, timeQuantum)
+    const result = ref(null)
+    console.log(result)
+    const showSolveButton = ref(true)
+    const quantumTime = ref('')
+    const showOutput = ref(false)
+    const inputError = ref(false)
+    const inputArrivalTime = ref('')
+    const inputBurstTime = ref('')
+    const algo = ref('')
+    const algorithms = [
+        'Round robin',
+        'First come first serve'
+    ]
 
-// Call the rr function
-const result = rr(arrivalTime, burstTime, timeQuantum)
+    function solve() {
 
-// Display the results
-console.log("Solved Processes Information:")
-console.log(result.solvedProcessesInfo)
-console.log("\nGantt Chart Information:")
-console.log(result.ganttChartInfo)
+        // showOutput.value = true
 
-  
+        arrivalTime.value = inputArrivalTime.value.split(/\s+/).map(Number).filter(Number);
+        burstTime.value = inputBurstTime.value.split(/\s+/).map(Number).filter(Number);
+
+        if(algo.value == 'First come first serve') {
+            // let x = [0, 4, 1, 4, 8]
+            // let y = [8, 10, 5, 3, 2]
+            result.value = fcfs(arrivalTime.value, burstTime.value)
+            console.log(result.value)
+            showOutput.value = true
+        }
+        if(algo.value == 'Round robin') {
+            console.log("HERE!!")
+            console.log(parseInt(timeQuantum.value))
+            result.value = rr(arrivalTime.value, burstTime.value, parseInt(timeQuantum.value))
+            showOutput.value = true
+        }
+    }
+
+    // Display the results
+    // console.log("Solved Processes Information:")
+    // console.log(result.solvedProcessesInfo)
+
+
+    // console.log("\nGantt Chart Information:")
+    // console.log(result.ganttChartInfo)
+        
 
 </script>
 <template>
@@ -27,19 +63,15 @@ console.log(result.ganttChartInfo)
                     <v-card>
                         <v-card-item>
                             <p class="text-h4 my-3 font-weight-bold">Input</p>
-                            <v-select density="comfortable" variant="outlined" color="blue" :items="algorithms" item-title="name" v-model="algorithm" label="Algorithm">
-                                <template v-slot:item="{ props, item }">
-                                    <v-list-item v-bind="props" :disabled="item.raw.disabled" :title="item.raw.name"></v-list-item>
-                                </template>
+                            <v-select density="comfortable" v-model="algo" variant="outlined" color="blue" :items="algorithms" item-title="name" label="Algorithm">
                             </v-select>
-                            <v-text-field clearable density="comfortable" variant="outlined" color="blue" v-model="arrivalTimes" label="Arrival Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
-                            <v-text-field clearable density="comfortable" variant="outlined" color="blue" v-model="burstTimes" label="Burst Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
+                            <v-text-field clearable density="comfortable" variant="outlined" color="blue" v-model="inputArrivalTime" label="Arrival Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
+                            <v-text-field clearable density="comfortable" variant="outlined" color="blue" v-model="inputBurstTime" label="Burst Times" placeholder="eg. 0 2 4 5 6"></v-text-field>
+                            <v-text-field clearable density="comfortable" variant="outlined" color="blue" type="number" v-if="algo == 'Round robin'" v-model="timeQuantum" label="Quantum time" placeholder="eg. 3"></v-text-field>
                         </v-card-item>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue" v-if="showSolveButton" variant="flat" @click="solveFCFS">Solve</v-btn>
-                            <v-btn color="blue" v-if="showSolveButton" variant="flat" @click="solveSJF">SolveSJF</v-btn>
-                            <v-btn color="red" v-else variant="flat" @click="reset">Reset</v-btn>
+                            <v-btn color="blue"  variant="flat" @click="solve">Solve</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-col>
@@ -51,10 +83,10 @@ console.log(result.ganttChartInfo)
                             <div v-if="showOutput">
                                 <p class="text-h6 text-center">Gantt chart</p>
                                 <div class="d-flex align-center justify-center mb-8">
-                                    <div class="position-relative" v-for="(process, i) in processes" :key="process.process_name">
-                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">{{ process.process_name }}</div>
-                                        <span class="number">{{ ganttChartTimes[i] }}</span>
-                                        <span class="last_number" v-if="i == processes.length-1">{{ ganttChartTimes[processes.length] }}</span>
+                                    <div class="position-relative" v-for="(process, index) in result.ganttChartInfo" :key="process.name">
+                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">{{ process.name }}</div>
+                                        <span class="number">{{ process.start }}</span>
+                                        <span class="last_number" v-if="index == result.ganttChartInfo.length - 1">{{ process.stop }}</span>
                                     </div>
                                 </div>
                                 
@@ -67,82 +99,26 @@ console.log(result.ganttChartInfo)
                                             <th> Completion Time</th>
                                             <th> Turnaround Time</th>
                                             <th> Waiting Time </th>
+                                            <th> Response Time </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- <tr v-for="process in processes" :key="process.process_name">
-                                            <td>{{process.process_name}}</td>
-                                            <td>{{process.arrival_time}}</td>
-                                            <td>{{process.burst_time }}</td>
-                                            <td>{{ process.completion_time }}</td>
-                                            <td>{{ process.turn_around_time }}</td>
-                                            <td>{{ process.waiting_time }}</td>
+                                        <tr v-for="process in result.solvedProcessesInfo" :key="process.name">
+                                            <td>{{ process.name }}</td>
+                                            <td>{{ process.at }}</td>
+                                            <td>{{ process.bt }}</td>
+                                            <td>{{ process.ct }}</td>
+                                            <td>{{ process.tat }}</td>
+                                            <td>{{ process.wt }}</td>
+                                            <td>{{ process.rt }}</td>
                                         </tr>
                                         
                                         <tr>
                                             <td colspan="3" class="text-end">Average</td>
-                                            <td>{{averageCompletionTime.toFixed(3)}}</td>
-                                            <td>{{averageTurnAroundTime.toFixed(3)}}</td>
-                                            <td>{{averageWaitingTime.toFixed(3)}}</td>
-                                        </tr> -->
-                                        <tr v-for="process in processes" :key="process.process_name">
-                                            <td>{{ process.process_name }}</td>
-                                            <td>{{process.arrival_time}}</td>
-                                            <td>{{process.burst_time}}</td>
-                                            <td>{{n}}</td>
-                                            <td>{{n}}</td>
-                                            <td>{{n}}</td>
-                                        </tr>
-                                        
-                                        <tr>
-                                            <td colspan="3" class="text-end">Average</td>
-                                            <td>h</td>
-                                            <td>h</td>
-                                            <td>h</td>
-                                        </tr>
-                                    </tbody>
-                                </v-table>
-                                <v-table border hover>
-                                    <thead>
-                                        <tr>
-                                            <th> Process </th>
-                                            <th> Arrival Time </th>
-                                            <th> Burst Time </th>
-                                            <th> Completion Time</th>
-                                            <th> Turnaround Time</th>
-                                            <th> Waiting Time </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- <tr v-for="process in processes" :key="process.process_name">
-                                            <td>{{process.process_name}}</td>
-                                            <td>{{process.arrival_time}}</td>
-                                            <td>{{process.burst_time }}</td>
-                                            <td>{{ process.completion_time }}</td>
-                                            <td>{{ process.turn_around_time }}</td>
-                                            <td>{{ process.waiting_time }}</td>
-                                        </tr>
-                                        
-                                        <tr>
-                                            <td colspan="3" class="text-end">Average</td>
-                                            <td>{{averageCompletionTime.toFixed(3)}}</td>
-                                            <td>{{averageTurnAroundTime.toFixed(3)}}</td>
-                                            <td>{{averageWaitingTime.toFixed(3)}}</td>
-                                        </tr> -->
-                                        <tr v-for="process in sortedProcessesSJF" :key="process.process_name">
-                                            <td>{{ process.process_name }}</td>
-                                            <td>{{process.arrival_time}}</td>
-                                            <td>{{process.burst_time}}</td>
-                                            <td>{{n}}</td>
-                                            <td>{{n}}</td>
-                                            <td>{{n}}</td>
-                                        </tr>
-                                        
-                                        <tr>
-                                            <td colspan="3" class="text-end">Average</td>
-                                            <td>h</td>
-                                            <td>h</td>
-                                            <td>h</td>
+                                            <td> {{ result.averageCt + " ms" }} </td>
+                                            <td> {{ result.averageTat + " ms" }} </td>
+                                            <td> {{ result.averageWt + " ms" }} </td>
+                                            <td> {{ result.averageRt + " ms" }} </td>
                                         </tr>
                                     </tbody>
                                 </v-table>
@@ -155,13 +131,13 @@ console.log(result.ganttChartInfo)
         <v-dialog v-model="inputError" width="50vw">
             <v-card>
                 <v-card-text class="text-center">
-                    <v-icon color="red" size="100">mdi-close-circle</v-icon>
+                    <v-icon color="red" size="69">mdi-close-circle</v-icon>
                     <br>
                     <p class="text-h4 text-red">Invalid input</p>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="primary" @click="inputError = false">AWW IKAW GUD</v-btn>
+                    <v-btn color="primary" block @click="inputError = false">Okayy</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>

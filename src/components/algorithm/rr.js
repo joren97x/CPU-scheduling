@@ -41,15 +41,9 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
 
         const processToExecute = readyQueue[0]
 
-        console.log("ready queue length: " + readyQueue.length)
-        console.log("unfinishedJobs queue length: " + unfinishedJobs.length)
-
         if(readyQueue.length == 1 && unfinishedJobs.length == 1) {
-            console.log("GO")
-            console.log(processToExecute)
             const prevCurrentTime = currentTime
             currentTime += (processToExecute.bt - timeQuantum)
-            console.log(currentTime )
             ganttChartInfo.push({
                 name: processToExecute.name,
                 job: processToExecute.job,
@@ -58,9 +52,9 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
             })
             solvedProcessesInfo.push({
                 ...processToExecute,
-                ft: prevCurrentTime + (processToExecute.bt - timeQuantum),
+                ct: prevCurrentTime + (processToExecute.bt - timeQuantum),
                 tat: currentTime - processToExecute.at,
-                wat: currentTime - processToExecute.at - processToExecute.bt,
+                wt: currentTime - processToExecute.at - processToExecute.bt,
             })
             break;
         }
@@ -115,20 +109,57 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
 
       solvedProcessesInfo.push({
         ...processToExecute,
-        ft: currentTime,
+        ct: currentTime,
         tat: currentTime - processToExecute.at,
-        wat: currentTime - processToExecute.at - processToExecute.bt,
+        wt: currentTime - processToExecute.at - processToExecute.bt,
       })
     }
   }
 
-    solvedProcessesInfo.sort((obj1, obj2) => {
-            if (obj1.at > obj2.at) return 1
-            if (obj1.at < obj2.at) return -1
-            if (obj1.job > obj2.job) return 1
-            if (obj1.job < obj2.job) return -1
-            return 0
+    solvedProcessesInfo.sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        if (nameA < nameB) {
+            return -1;
+        }
+        if (nameA > nameB) {
+            return 1;
+        }
+        return 0;
+    });
+
+    
+
+    const uniqueGanttChartInfo = ganttChartInfo.filter((item, index, array) => {
+        return array.findIndex((element) => element.name === item.name) === index;
+    });
+
+    uniqueGanttChartInfo.sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        if (nameA < nameB) {
+            return -1;
+        }
+        if (nameA > nameB) {
+            return 1;
+        }
+        return 0;
+    });
+    
+    // Output the unique array
+    console.log(uniqueGanttChartInfo);
+
+    solvedProcessesInfo.forEach((process, i) => {
+    console.log(uniqueGanttChartInfo[i].start + " - " + process.at);
+        process.rt = uniqueGanttChartInfo[i].start - process.at
+        console.log(process)
+        console.log(i)
     })
 
-    return { solvedProcessesInfo, ganttChartInfo }
+    const averageCt = solvedProcessesInfo.reduce((acc, val) => acc + val.ct, 0) / arrivalTime.length
+    const averageTat = solvedProcessesInfo.reduce((acc, val) => acc + val.tat, 0) / arrivalTime.length
+    const averageWt = solvedProcessesInfo.reduce((acc, val) => acc + val.wt, 0) / arrivalTime.length
+    const averageRt = solvedProcessesInfo.reduce((acc, val) => acc + val.rt, 0) / arrivalTime.length
+
+    return { solvedProcessesInfo, ganttChartInfo, averageCt, averageTat, averageWt, averageRt }
 }

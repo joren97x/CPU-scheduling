@@ -51,7 +51,29 @@ export const fcfs = (arrivalTime, burstTime) => {
         }
     })
 
-    ganttChartInfo.sort((a, b) => {
+    //  const sortedGanttChartInfo = ganttChartInfo.sort((a, b) => {
+    //      const nameA = a.name.toLowerCase();
+    //      const nameB = b.name.toLowerCase();
+    //     if (nameA < nameB) {
+    //          return -1;
+    //      }
+    //      if (nameA > nameB) {
+    //          return 1;
+    //      }
+    //      return 0;
+    //  })
+
+    let ganttChartArrivalTime = []
+    ganttChartInfo.forEach((val) => {
+        ganttChartArrivalTime.push({
+            name: val.name,
+            start: val.start
+        })
+    })
+    console.log("NOT SORTED ARRIVAL TIME REPOSONE")
+    console.log(ganttChartArrivalTime)
+
+    ganttChartArrivalTime.sort((a, b) => {
         const nameA = a.name.toLowerCase();
         const nameB = b.name.toLowerCase();
         if (nameA < nameB) {
@@ -61,7 +83,10 @@ export const fcfs = (arrivalTime, burstTime) => {
             return 1;
         }
         return 0;
-    })
+    });
+    console.log("SORTED ARRIVAL TIME REPOSONE")
+
+    console.log(ganttChartArrivalTime)
 
     solvedProcessesInfo.sort((a, b) => {
         const nameA = a.name.toLowerCase();
@@ -76,8 +101,8 @@ export const fcfs = (arrivalTime, burstTime) => {
     });
 
     solvedProcessesInfo.forEach((process, i) => {
-        console.log(ganttChartInfo[i].start + " - " + process.at);
-            process.rt = ganttChartInfo[i].start - process.at
+        console.log(ganttChartArrivalTime[i].start + " - " + process.at);
+            process.rt = ganttChartArrivalTime[i].start - process.at
             console.log(process)
             console.log(i)
     })

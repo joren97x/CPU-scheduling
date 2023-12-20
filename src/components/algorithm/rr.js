@@ -97,22 +97,22 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
     readyQueue.push(readyQueue.shift())
 
     if (remainingTime[processToExecute.job] === 0) {
-      const indexToRemoveUJ = unfinishedJobs.indexOf(processToExecute)
-      if (indexToRemoveUJ > -1) {
-        unfinishedJobs.splice(indexToRemoveUJ, 1)
-      }
+        const indexToRemoveUJ = unfinishedJobs.indexOf(processToExecute)
+        if (indexToRemoveUJ > -1) {
+            unfinishedJobs.splice(indexToRemoveUJ, 1)
+        }
 
-      const indexToRemoveRQ = readyQueue.indexOf(processToExecute)
-      if (indexToRemoveRQ > -1) {
-        readyQueue.splice(indexToRemoveRQ, 1)
-      }
+        const indexToRemoveRQ = readyQueue.indexOf(processToExecute)
+        if (indexToRemoveRQ > -1) {
+            readyQueue.splice(indexToRemoveRQ, 1)
+        }
 
-      solvedProcessesInfo.push({
-        ...processToExecute,
-        ct: currentTime,
-        tat: currentTime - processToExecute.at,
-        wt: currentTime - processToExecute.at - processToExecute.bt,
-      })
+        solvedProcessesInfo.push({
+            ...processToExecute,
+            ct: currentTime,
+            tat: currentTime - processToExecute.at,
+            wt: currentTime - processToExecute.at - processToExecute.bt,
+        })
     }
   }
 

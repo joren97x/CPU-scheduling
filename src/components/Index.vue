@@ -27,8 +27,8 @@
 
         // showOutput.value = true
 
-        arrivalTime.value = inputArrivalTime.value.split(/\s+/).map(Number).filter(Number);
-        burstTime.value = inputBurstTime.value.split(/\s+/).map(Number).filter(Number);
+        arrivalTime.value = inputArrivalTime.value.split(/\s+/).map(value => +value).filter(value => !isNaN(value));
+burstTime.value = inputBurstTime.value.split(/\s+/).map(value => +value).filter(value => !isNaN(value));
 
         if(algo.value == 'First come first serve') {
             // let x = [0, 4, 1, 4, 8]

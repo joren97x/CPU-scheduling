@@ -16,6 +16,7 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
 
     const solvedProcessesInfo = []
     const ganttChartInfo = []
+    const ready = []
 
     const readyQueue = []
     let currentTime = processesInfo[0].at
@@ -40,24 +41,29 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
         }
 
         const processToExecute = readyQueue[0]
+        ready.push(processToExecute)
+        // if(readyQueue.length == 1 && unfinishedJobs.length == 1) {
 
-        if(readyQueue.length == 1 && unfinishedJobs.length == 1) {
-            const prevCurrentTime = currentTime
-            currentTime += processToExecute.bt
-            ganttChartInfo.push({
-                name: processToExecute.name,
-                job: processToExecute.job,
-                start: prevCurrentTime,
-                stop: currentTime,
-            })
-            solvedProcessesInfo.push({
-                ...processToExecute,
-                ct: prevCurrentTime + processToExecute.bt,
-                tat: currentTime - processToExecute.at,
-                wt: currentTime - processToExecute.at - processToExecute.bt,
-            })
-            break;
-        }
+        //     const prevCurrentTime = currentTime
+        //     currentTime += processToExecute.bt
+        //     console.log(prevCurrentTime)
+        //     console.log(currentTime)
+
+        //     ganttChartInfo.push({
+        //         name: processToExecute.name,
+        //         job: processToExecute.job,
+        //         start: prevCurrentTime,
+        //         stop: currentTime,
+        //     })
+        //     solvedProcessesInfo.push({
+        //         ...processToExecute,
+        //         ct: currentTime,
+        //         tat: currentTime - processToExecute.at,
+        //         wt: currentTime - processToExecute.at - processToExecute.bt,
+        //     })
+        //     break;
+
+        // }
 
         if (remainingTime[processToExecute.job] <= timeQuantum) {
             const remainingT = remainingTime[processToExecute.job]
@@ -147,13 +153,9 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
     });
     
     // Output the unique array
-    console.log(uniqueGanttChartInfo);
 
     solvedProcessesInfo.forEach((process, i) => {
-    console.log(uniqueGanttChartInfo[i].start + " - " + process.at);
         process.rt = uniqueGanttChartInfo[i].start - process.at
-        console.log(process)
-        console.log(i)
     })
 
     const averageCt = solvedProcessesInfo.reduce((acc, val) => acc + val.ct, 0) / arrivalTime.length
@@ -161,5 +163,5 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
     const averageWt = solvedProcessesInfo.reduce((acc, val) => acc + val.wt, 0) / arrivalTime.length
     const averageRt = solvedProcessesInfo.reduce((acc, val) => acc + val.rt, 0) / arrivalTime.length
 
-    return { solvedProcessesInfo, ganttChartInfo, averageCt, averageTat, averageWt, averageRt }
+    return { solvedProcessesInfo, ganttChartInfo, averageCt, averageTat, averageWt, averageRt,ready }
 }

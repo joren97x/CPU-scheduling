@@ -81,6 +81,14 @@ burstTime.value = inputBurstTime.value.split(/\s+/).map(value => +value).filter(
                             <p class="text-h4 my-3 font-weight-bold">Output</p>
                             <p v-show="!showOutput">Gantt chart and table will be shown here</p>
                             <div v-if="showOutput">
+                                <p class="text-h6 text-center">Ready Queue</p>
+                                <div class="d-flex align-center justify-center mb-8">
+                                    <div class="position-relative" v-for="(process, index) in result.ready" :key="process.name">
+                                        <div class="pa-3 bg-blue-lighten-4 gantt-box">{{ process.name }}</div>
+                                        <span class="number">{{ process.start }}</span>
+                                        <span class="last_number" v-if="index == result.ganttChartInfo.length - 1">{{ process.stop }}</span>
+                                    </div>
+                                </div>
                                 <p class="text-h6 text-center">Gantt chart</p>
                                 <div class="d-flex align-center justify-center mb-8">
                                     <div class="position-relative" v-for="(process, index) in result.ganttChartInfo" :key="process.name">

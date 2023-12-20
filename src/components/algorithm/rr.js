@@ -43,7 +43,7 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
 
         if(readyQueue.length == 1 && unfinishedJobs.length == 1) {
             const prevCurrentTime = currentTime
-            currentTime += (processToExecute.bt - timeQuantum)
+            currentTime += processToExecute.bt
             ganttChartInfo.push({
                 name: processToExecute.name,
                 job: processToExecute.job,
@@ -52,7 +52,7 @@ export const rr = (arrivalTime, burstTime, timeQuantum) => {
             })
             solvedProcessesInfo.push({
                 ...processToExecute,
-                ct: prevCurrentTime + (processToExecute.bt - timeQuantum),
+                ct: prevCurrentTime + processToExecute.bt,
                 tat: currentTime - processToExecute.at,
                 wt: currentTime - processToExecute.at - processToExecute.bt,
             })

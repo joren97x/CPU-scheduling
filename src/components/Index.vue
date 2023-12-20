@@ -1,86 +1,22 @@
 <script setup>
 
-    import {ref} from 'vue'
+    import {rr} from './algorithm/rr.js'
 
-    const algorithm = ref('First Come First Serve')
-    const inputError = ref(false)
-    const showOutput = ref(false)
-    const showSolveButton = ref(true)
-    const arrivalTimes = ref('')
-    const burstTimes = ref('')
-    const formattedAT = ref()
-    const formattedBT = ref()
-    const processes = ref([])
-    const ganttChartTimes = ref([])
-    const averageCompletionTime = ref()
-    const averageTurnAroundTime = ref()
-    const averageWaitingTime = ref()
-    const algorithms = [
-        {
-            name: 'First Come First Serve',
-            disabled: false,
-        },
-        {
-            name: 'Shortest Job First (non-preemptive)',
-            disabled: true,
-        },
-        {
-            name: 'Round Robin',
-            disabled: true,
-        },
-    ]
+// Example data
+const arrivalTime = [0, 4, 1, 4, 8]
+const burstTime = [8, 10, 5, 3, 2]
+const timeQuantum = 3
 
-    function solve() {
-        formattedAT.value = arrivalTimes.value.trim().split(" ")
-        formattedBT.value = burstTimes.value.trim().split(" ")
-        if(formattedAT.value.length != formattedBT.value.length || burstTimes.value.length == 0 || arrivalTimes.value.length == 0 || /[^0-9\s]/.test(arrivalTimes.value) || /[^0-9\s]/.test(burstTimes.value)) {
-            inputError.value = true
-        }
-        else {
-            showSolveButton.value = false
-            showOutput.value = true
-            for(let i = 0; i < formattedAT.value.length; i++) {
-                processes.value.push({
-                    process_name: `P${i+1}`,
-                    'arrival_time': formattedAT.value[i], 
-                    'burst_time': formattedBT.value[i]
-                })
-            }
+// Call the rr function
+const result = rr(arrivalTime, burstTime, timeQuantum)
 
-            processes.value.sort((a, b) => a.arrival_time - b.arrival_time)
-            let defaultTime = parseInt(processes.value[0].arrival_time)
-            let completion_time = 0
-            let turn_around_time = 0
-            let waiting_time = 0
-            ganttChartTimes.value.push(defaultTime)
-            for(let i = 0; i < processes.value.length; i++) {
-                defaultTime += parseInt(processes.value[i].burst_time)
-                console.log("Default Time: " + defaultTime)
-                console.log("Arrival time: " + processes.value[i].arrival_time)
-                ganttChartTimes.value.push(defaultTime)
-                processes.value[i].completion_time = defaultTime
-                completion_time += defaultTime
-                processes.value[i].turn_around_time = defaultTime - parseInt(processes.value[i].arrival_time)
-                turn_around_time += parseInt(processes.value[i].turn_around_time)
-                processes.value[i].waiting_time = parseInt(processes.value[i].turn_around_time) - parseInt(processes.value[i].burst_time)
-                waiting_time += parseInt(processes.value[i].waiting_time)
-            }
-            averageCompletionTime.value = completion_time / processes.value.length
-            averageWaitingTime.value = waiting_time / processes.value.length
-            averageTurnAroundTime.value = turn_around_time / processes.value.length
+// Display the results
+console.log("Solved Processes Information:")
+console.log(result.solvedProcessesInfo)
+console.log("\nGantt Chart Information:")
+console.log(result.ganttChartInfo)
 
-        }
-        
-    }
-
-    function reset() {
-        processes.value = []
-        ganttChartTimes.value = []
-        arrivalTimes.value = ''
-        burstTimes.value = ''
-        showSolveButton.value = true
-        showOutput.value = false
-    }
+  
 
 </script>
 <template>
@@ -101,7 +37,8 @@
                         </v-card-item>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue" v-if="showSolveButton" variant="flat" @click="solve">Solve</v-btn>
+                            <v-btn color="blue" v-if="showSolveButton" variant="flat" @click="solveFCFS">Solve</v-btn>
+                            <v-btn color="blue" v-if="showSolveButton" variant="flat" @click="solveSJF">SolveSJF</v-btn>
                             <v-btn color="red" v-else variant="flat" @click="reset">Reset</v-btn>
                         </v-card-actions>
                     </v-card>
@@ -133,7 +70,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="process in processes" :key="process.process_name">
+                                        <!-- <tr v-for="process in processes" :key="process.process_name">
                                             <td>{{process.process_name}}</td>
                                             <td>{{process.arrival_time}}</td>
                                             <td>{{process.burst_time }}</td>
@@ -147,6 +84,65 @@
                                             <td>{{averageCompletionTime.toFixed(3)}}</td>
                                             <td>{{averageTurnAroundTime.toFixed(3)}}</td>
                                             <td>{{averageWaitingTime.toFixed(3)}}</td>
+                                        </tr> -->
+                                        <tr v-for="process in processes" :key="process.process_name">
+                                            <td>{{ process.process_name }}</td>
+                                            <td>{{process.arrival_time}}</td>
+                                            <td>{{process.burst_time}}</td>
+                                            <td>{{n}}</td>
+                                            <td>{{n}}</td>
+                                            <td>{{n}}</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td colspan="3" class="text-end">Average</td>
+                                            <td>h</td>
+                                            <td>h</td>
+                                            <td>h</td>
+                                        </tr>
+                                    </tbody>
+                                </v-table>
+                                <v-table border hover>
+                                    <thead>
+                                        <tr>
+                                            <th> Process </th>
+                                            <th> Arrival Time </th>
+                                            <th> Burst Time </th>
+                                            <th> Completion Time</th>
+                                            <th> Turnaround Time</th>
+                                            <th> Waiting Time </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- <tr v-for="process in processes" :key="process.process_name">
+                                            <td>{{process.process_name}}</td>
+                                            <td>{{process.arrival_time}}</td>
+                                            <td>{{process.burst_time }}</td>
+                                            <td>{{ process.completion_time }}</td>
+                                            <td>{{ process.turn_around_time }}</td>
+                                            <td>{{ process.waiting_time }}</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td colspan="3" class="text-end">Average</td>
+                                            <td>{{averageCompletionTime.toFixed(3)}}</td>
+                                            <td>{{averageTurnAroundTime.toFixed(3)}}</td>
+                                            <td>{{averageWaitingTime.toFixed(3)}}</td>
+                                        </tr> -->
+                                        <tr v-for="process in sortedProcessesSJF" :key="process.process_name">
+                                            <td>{{ process.process_name }}</td>
+                                            <td>{{process.arrival_time}}</td>
+                                            <td>{{process.burst_time}}</td>
+                                            <td>{{n}}</td>
+                                            <td>{{n}}</td>
+                                            <td>{{n}}</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td colspan="3" class="text-end">Average</td>
+                                            <td>h</td>
+                                            <td>h</td>
+                                            <td>h</td>
                                         </tr>
                                     </tbody>
                                 </v-table>
